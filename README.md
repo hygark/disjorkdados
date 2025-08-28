@@ -1,5 +1,7 @@
 # DisjorkDados
 
+by @hygark
+
 ## ⚠️ IMPORTANT LEGAL NOTICE
 
 This tool is strictly for educational purposes and assisting users in creating servers. It simulates the cloning or restoration of Discord server structures (categories, text/voice/forum/announcement/stage channels, names, customizations, and roles), but it must **NOT** be used on servers without the explicit authorization of their owners.

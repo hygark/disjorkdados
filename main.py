@@ -53,12 +53,13 @@ async def clone_channel(guild, channel, category, r, log_level):
                 category=category,
                 topic=channel.topic,
                 position=channel.position,
-                permission_overwrites=channel.overwrites
+                permission_overwrites=channel.overwrites,
+                is_news=channel.is_news()
             )
             result['status'] = 'success'
-            result['data'] = f'Text channel {channel.name} cloned'
+            result['data'] = f'{"Announcement" if channel.is_news() else "Text"} channel {channel.name} cloned'
             if log_level == 'detailed':
-                result['details'] = {'topic': channel.topic, 'overwrites': str(channel.overwrites)}
+                result['details'] = {'topic': channel.topic, 'overwrites': str(channel.overwrites), 'is_news': channel.is_news()}
         elif isinstance(channel, discord.VoiceChannel):
             new_channel = await guild.create_voice_channel(
                 name=channel.name,
@@ -68,6 +69,29 @@ async def clone_channel(guild, channel, category, r, log_level):
             )
             result['status'] = 'success'
             result['data'] = f'Voice channel {channel.name} cloned'
+            if log_level == 'detailed':
+                result['details'] = {'overwrites': str(channel.overwrites)}
+        elif isinstance(channel, discord.ForumChannel):
+            new_channel = await guild.create_forum_channel(
+                name=channel.name,
+                category=category,
+                topic=channel.topic,
+                position=channel.position,
+                permission_overwrites=channel.overwrites
+            )
+            result['status'] = 'success'
+            result['data'] = f'Forum channel {channel.name} cloned'
+            if log_level == 'detailed':
+                result['details'] = {'topic': channel.topic, 'overwrites': str(channel.overwrites)}
+        elif isinstance(channel, discord.StageChannel):
+            new_channel = await guild.create_stage_channel(
+                name=channel.name,
+                category=category,
+                position=channel.position,
+                permission_overwrites=channel.overwrites
+            )
+            result['status'] = 'success'
+            result['data'] = f'Stage channel {channel.name} cloned'
             if log_level == 'detailed':
                 result['details'] = {'overwrites': str(channel.overwrites)}
         time.sleep(RATE_LIMIT_DELAY)
@@ -90,6 +114,115 @@ async def clone_category(guild, category, r, log_level):
         result['data'] = f'Category {category.name} cloned'
         if log_level == 'detailed':
             result['details'] = {'overwrites': str(category.overwrites)}
+        time.sleep(RATE_LIMIT_DELAY)
+        return new_category
+    except Exception as e:
+        result['data'] = str(e)
+    return result
+
+async def create_role(guild, role_data, r, log_level):
+    result = {'role_name': role_data['name'], 'type': 'role', 'status': 'failed', 'data': None}
+    try:
+        if random.random() < 0.05:
+            result['data'] = 'Worker failed (simulated)'
+            return result
+        permissions = discord.Permissions(**{perm.strip(): True for perm in role_data.get('permissions', '').split(',') if perm.strip()}) if role_data.get('permissions') else discord.Permissions.none()
+        new_role = await guild.create_role(
+            name=role_data['name'],
+            permissions=permissions,
+            colour=discord.Colour(int(role_data.get('color', '#000000').replace('#', ''), 16)),
+            hoist=role_data.get('hoist', False),
+            mentionable=role_data.get('mentionable', False)
+        )
+        result['status'] = 'success'
+        result['data'] = f'Role {role_data["name"]} created'
+        if log_level == 'detailed':
+            result['details'] = {'permissions': str(permissions), 'color': role_data.get('color')}
+        time.sleep(RATE_LIMIT_DELAY)
+    except Exception as e:
+        result['data'] = str(e)
+    return result
+
+async def create_channel(guild, channel_data, category_map, r, log_level):
+    result = {'channel_name': channel_data['name'], 'type': channel_data['type'], 'status': 'failed', 'data': None}
+    try:
+        if random.random() < 0.05:
+            result['data'] = 'Worker failed (simulated)'
+            return result
+        category = category_map.get(channel_data.get('category')) if channel_data.get('category') else None
+        if channel_data['type'] == 'text':
+            new_channel = await guild.create_text_channel(
+                name=channel_data['name'],
+                category=category,
+                topic=channel_data.get('topic', ''),
+                position=channel_data.get('position', 0)
+            )
+            result['status'] = 'success'
+            result['data'] = f'Text channel {channel_data["name"]} created'
+            if log_level == 'detailed':
+                result['details'] = {'topic': channel_data.get('topic'), 'category': channel_data.get('category')}
+        elif channel_data['type'] == 'voice':
+            new_channel = await guild.create_voice_channel(
+                name=channel_data['name'],
+                category=category,
+                position=channel_data.get('position', 0)
+            )
+            result['status'] = 'success'
+            result['data'] = f'Voice channel {channel_data["name"]} created'
+            if log_level == 'detailed':
+                result['details'] = {'category': channel_data.get('category')}
+        elif channel_data['type'] == 'forum':
+            new_channel = await guild.create_forum_channel(
+                name=channel_data['name'],
+                category=category,
+                topic=channel_data.get('topic', ''),
+                position=channel_data.get('position', 0)
+            )
+            result['status'] = 'success'
+            result['data'] = f'Forum channel {channel_data["name"]} created'
+            if log_level == 'detailed':
+                result['details'] = {'topic': channel_data.get('topic'), 'category': channel_data.get('category')}
+        elif channel_data['type'] == 'announcement':
+            new_channel = await guild.create_text_channel(
+                name=channel_data['name'],
+                category=category,
+                topic=channel_data.get('topic', ''),
+                position=channel_data.get('position', 0),
+                is_news=True
+            )
+            result['status'] = 'success'
+            result['data'] = f'Announcement channel {channel_data["name"]} created'
+            if log_level == 'detailed':
+                result['details'] = {'topic': channel_data.get('topic'), 'category': channel_data.get('category')}
+        elif channel_data['type'] == 'stage':
+            new_channel = await guild.create_stage_channel(
+                name=channel_data['name'],
+                category=category,
+                position=channel_data.get('position', 0)
+            )
+            result['status'] = 'success'
+            result['data'] = f'Stage channel {channel_data["name"]} created'
+            if log_level == 'detailed':
+                result['details'] = {'category': channel_data.get('category')}
+        time.sleep(RATE_LIMIT_DELAY)
+    except Exception as e:
+        result['data'] = str(e)
+    return result
+
+async def create_category(guild, category_data, r, log_level):
+    result = {'category_name': category_data['name'], 'type': 'category', 'status': 'failed', 'data': None}
+    try:
+        if random.random() < 0.05:
+            result['data'] = 'Worker failed (simulated)'
+            return result
+        new_category = await guild.create_category(
+            name=category_data['name'],
+            position=category_data.get('position', 0)
+        )
+        result['status'] = 'success'
+        result['data'] = f'Category {category_data["name"]} created'
+        if log_level == 'detailed':
+            result['details'] = {'position': category_data.get('position')}
         time.sleep(RATE_LIMIT_DELAY)
         return new_category
     except Exception as e:
@@ -128,7 +261,7 @@ def create_grafana_dashboard(api_key, data):
     print("Dashboard criado no Grafana!")
 
 def generate_chart(data):
-    labels = [f"Item {d.get('role_id') or d.get('channel_id') or d.get('category_id')}" for d in data]
+    labels = [f"Item {d.get('role_id') or d.get('channel_id') or d.get('category_id') or d.get('role_name') or d.get('channel_name') or d.get('category_name')}" for d in data]
     values = [1 if d['status'] == 'success' else 0 for d in data]
     types = [d['type'] for d in data]
     
@@ -189,7 +322,7 @@ def generate_chart(data):
     print("Gráfico interativo salvo em chart.html")
 
 async def main(token, source_id, dest_id, grafana_key, config=None):
-    print("Iniciando Hygark's DisjorkDados")
+    print("Iniciando Hygark's DisjorkDados!")
     config = config or {}
     log_level = config.get('log_level', 'normal')
     order = config.get('order', 'roles,categories,channels').split(',')
@@ -197,50 +330,86 @@ async def main(token, source_id, dest_id, grafana_key, config=None):
     r = redis.Redis(host=REDIS_HOST, port=6379, decode_responses=True)
     
     await bot.start(token)
-    source_guild = bot.get_guild(int(source_id))
     dest_guild = bot.get_guild(int(dest_id))
     
-    if not source_guild or not dest_guild:
-        print("Erro: Servidor origem ou destino não encontrado!")
+    if not dest_guild:
+        print("Erro: Servidor destino não encontrado!")
         await bot.close()
         return
     
-    # Enviar itens pra Redis
-    for item_type in order:
-        if item_type == 'roles':
-            for role in source_guild.roles:
-                if role.name != "@everyone":
-                    r.rpush('roles', json.dumps({'role_id': role.id}))
-        elif item_type == 'categories':
-            for category in source_guild.categories:
-                r.rpush('categories', json.dumps({'category_id': category.id}))
-        elif item_type == 'channels':
-            for channel in source_guild.channels:
-                if not channel.category:
-                    r.rpush('channels', json.dumps({'channel_id': channel.id}))
-    
-    # Processar clonagem
     results = []
     category_map = {}
     
-    for item_type in order:
-        if item_type == 'roles':
-            for role in source_guild.roles:
-                if role.name != "@everyone":
-                    result = await clone_role(dest_guild, role, r, log_level)
+    if source_id:  # Modo Bot
+        source_guild = bot.get_guild(int(source_id))
+        if not source_guild:
+            print("Erro: Servidor origem não encontrado!")
+            await bot.close()
+            return
+        
+        # Enviar itens pra Redis
+        for item_type in order:
+            if item_type == 'roles':
+                for role in source_guild.roles:
+                    if role.name != "@everyone":
+                        r.rpush('roles', json.dumps({'role_id': role.id}))
+            elif item_type == 'categories':
+                for category in source_guild.categories:
+                    r.rpush('categories', json.dumps({'category_id': category.id}))
+            elif item_type == 'channels':
+                for channel in source_guild.channels:
+                    if not channel.category:
+                        r.rpush('channels', json.dumps({'channel_id': channel.id}))
+        
+        # Processar clonagem
+        for item_type in order:
+            if item_type == 'roles':
+                for role in source_guild.roles:
+                    if role.name != "@everyone":
+                        result = await clone_role(dest_guild, role, r, log_level)
+                        results.append(result)
+            elif item_type == 'categories':
+                for category in source_guild.categories:
+                    result = await clone_category(dest_guild, category, r, log_level)
                     results.append(result)
-        elif item_type == 'categories':
-            for category in source_guild.categories:
-                result = await clone_category(dest_guild, category, r, log_level)
-                results.append(result)
-                if result['status'] == 'success':
-                    new_category = next(c for c in dest_guild.categories if c.name == category.name)
-                    category_map[category.id] = new_category
-        elif item_type == 'channels':
-            for channel in source_guild.channels:
-                category = category_map.get(channel.category_id) if channel.category_id else None
-                result = await clone_channel(dest_guild, channel, category, r, log_level)
-                results.append(result)
+                    if result['status'] == 'success':
+                        new_category = next(c for c in dest_guild.categories if c.name == category.name)
+                        category_map[category.id] = new_category
+            elif item_type == 'channels':
+                for channel in source_guild.channels:
+                    category = category_map.get(channel.category_id) if channel.category_id else None
+                    result = await clone_channel(dest_guild, channel, category, r, log_level)
+                    results.append(result)
+    
+    else:  # Modo Manual
+        for item_type in order:
+            if item_type == 'roles':
+                for role_data in config.get('roles', []):
+                    r.rpush('roles', json.dumps(role_data))
+            elif item_type == 'categories':
+                for category_data in config.get('categories', []):
+                    r.rpush('categories', json.dumps(category_data))
+            elif item_type == 'channels':
+                for channel_data in config.get('channels', []):
+                    r.rpush('channels', json.dumps(channel_data))
+        
+        # Processar criação
+        for item_type in order:
+            if item_type == 'roles':
+                for role_data in config.get('roles', []):
+                    result = await create_role(dest_guild, role_data, r, log_level)
+                    results.append(result)
+            elif item_type == 'categories':
+                for category_data in config.get('categories', []):
+                    result = await create_category(dest_guild, category_data, r, log_level)
+                    results.append(result)
+                    if result['status'] == 'success':
+                        new_category = next(c for c in dest_guild.categories if c.name == category_data['name'])
+                        category_map[category_data['name']] = new_category
+            elif item_type == 'channels':
+                for channel_data in config.get('channels', []):
+                    result = await create_channel(dest_guild, channel_data, category_map, r, log_level)
+                    results.append(result)
     
     # Exportar
     with open('output.json', 'w') as f:

@@ -20,7 +20,7 @@ services:
       - REDIS_HOST=redis
       - GRAFANA_URL=http://grafana:3000
       - BOT_TOKEN=YOUR_BOT_TOKEN  # Substitua
-      - SOURCE_SERVER=YOUR_SOURCE_SERVER_ID  # Substitua
+      - SOURCE_SERVER=YOUR_SOURCE_SERVER_ID  # Substitua (modo Bot)
       - DEST_SERVER=YOUR_DEST_SERVER_ID  # Substitua
   worker:
     build: .
@@ -32,7 +32,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - BOT_TOKEN=YOUR_BOT_TOKEN  # Substitua
-      - SOURCE_SERVER=YOUR_SOURCE_SERVER_ID  # Substitua
+      - SOURCE_SERVER=YOUR_SOURCE_SERVER_ID  # Substitua (modo Bot)
       - DEST_SERVER=YOUR_DEST_SERVER_ID  # Substitua
     deploy:
       replicas: 3

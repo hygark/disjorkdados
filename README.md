@@ -141,7 +141,7 @@ minikube service grafana-service
 ## ⚠️ Limitations
 
 * **Bot Mode:** Requires bot with permissions in source server (View Channels) and destination server (Manage Channels, Manage Roles).
-* **Manual Mode:** Requires user to provide structure (form or JSON), useful for manipulation victims.
+* **Manual Mode:** Requires user to provide structure (form or JSON).
 * **Discord Limits:**
 
   * Max 50 categories per server.

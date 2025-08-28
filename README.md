@@ -25,7 +25,6 @@ Example: your own servers, or with the consent of the owner. In **Manual Mode**,
 * **Deploy on Docker or Kubernetes** for scalable simulations.
 * Optional: Integration with **AWS S3** for log storage.
 
-**Goal:** Replicate important server structures (e.g., for meetings or communities) or assist victims of manipulation in restoring lost servers, always with **ethical use**.
 
 ---
 

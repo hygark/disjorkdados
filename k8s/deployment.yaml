@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: disjorkdados-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: disjorkdados-app
+  template:
+    metadata:
+      labels:
+        app: disjorkdados-app
+    spec:
+      containers:
+      - name: disjorkdados-app
+        image: disjorkdados:latest
+        command: ["python", "gui.py"]
+        envFrom:
+        - configMapRef:
+            name: disjorkdados-config
+        volumeMounts:
+        - name: app-volume
+          mountPath: /app
+      volumes:
+      - name: app-volume
+        hostPath:
+          path: /path/to/your/repo  # Ajuste pro seu diretório local
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: disjorkdados-worker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: disjorkdados-worker
+  template:
+    metadata:
+      labels:
+        app: disjorkdados-worker
+    spec:
+      containers:
+      - name: disjorkdados-worker
+        image: disjorkdados:latest
+        command: ["python", "worker.py"]
+        envFrom:
+        - configMapRef:
+            name: disjorkdados-config
+        volumeMounts:
+        - name: app-volume
+          mountPath: /app
+      volumes:
+      - name: app-volume
+        hostPath:
+          path: /path/to/your/repo  # Ajuste pro seu diretório local
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:latest
+        ports:
+        - containerPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000

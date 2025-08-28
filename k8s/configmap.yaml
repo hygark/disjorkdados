@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: disjorkdados-config
+data:
+  REDIS_HOST: redis-service
+  GRAFANA_URL: http://grafana-service:3000
+  BOT_TOKEN: "YOUR_BOT_TOKEN"  # Substitua
+  SOURCE_SERVER: "YOUR_SOURCE_SERVER_ID"  # Substitua
+  DEST_SERVER: "YOUR_DEST_SERVER_ID"  # Substitua

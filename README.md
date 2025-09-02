@@ -52,34 +52,6 @@ git clone https://github.com/hygark/disjorkdados.git
 * Create a **test server (Test Server)** with categories, channels, and roles.
 * Create an **empty backup server (Backup Server)** and add the bot as admin.
 
-### Configure Grafana:
-
-* Access: `http://localhost:3000`
-* Create an API key.
-
-### For Manual Mode:
-
-* Prepare a `structure.json` file or use the visual form in the GUI.
-
----
-
-## 🐳 Local Test (Docker)
-
-* Configure `docker-compose.yml` with `BOT_TOKEN`, `SOURCE_SERVER` (Bot Mode), and `DEST_SERVER`.
-* Run:
-
-```bash
-docker-compose up --build --scale worker=3
-```
-
-* View results in:
-
-  * `output.json`
-  * `chart.html`
-  * Grafana dashboard
-* Check the destination server on Discord.
-
----
 
 ## 💻 Local Test (GUI)
 
@@ -92,49 +64,6 @@ python gui.py
 * **Bot Mode:** Enter bot token, server IDs (source and destination), clone order, log level, and Grafana API key (optional).
 
 * **Manual Mode:** Enter bot token, destination server ID, and add categories, channels, and roles through the visual form or JSON upload.
-
-* Verify destination server, `chart.html`, and Grafana results.
-
----
-
-## ☸️ Deploy with Kubernetes
-
-1. Install Minikube (`minikube start`) or use a cloud cluster (EKS/GKE).
-2. Configure `k8s/configmap.yaml` with `BOT_TOKEN`, `SOURCE_SERVER` (Bot Mode), and `DEST_SERVER`.
-3. Apply configs:
-
-```bash
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-```
-
-4. Access Grafana:
-
-```bash
-minikube service grafana-service
-```
-
-5. Verify destination server and `chart.html`.
-
-**Example output:** JSON logs, interactive charts, Grafana dashboards.
-
----
-
-## 📂 Code Structure
-
-* **main.py:** Core logic, Discord, Redis, Grafana integration.
-* **gui.py:** Stylish GUI with Tkinter, titled *"Hygark's DisjorkDados"*.
-* **worker.py:** Processes cloning/creation of categories, channels, and roles in queues.
-* **Dockerfile:** For containerization.
-* **docker-compose.yml:** Orchestrates workers, Redis, Grafana (local test).
-* **k8s/**:
-
-  * `configmap.yaml`: Environment configs.
-  * `deployment.yaml`: Deployments for GUI and workers.
-  * `service.yaml`: Services for Redis and Grafana.
-* **chart.html:** Interactive chart with Chart.js.
-* **README.md:** This file.
 
 ---
 

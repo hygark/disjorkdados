@@ -1,6 +1,6 @@
 # DisjorkDados
 
-by @hygark
+isso é um teste
 
 ## ⚠️ IMPORTANT LEGAL NOTICE
 

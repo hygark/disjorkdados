@@ -2,10 +2,7 @@ import discord
 from discord.ext import commands
 import asyncio
 
-intents = discord.Intents.default()
-intents.guilds = True
-intents.channels = True
-intents.roles = True
+intents = discord.Intents.all()  # Ativa todos os intents pra evitar problemas de versão
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 async def create_role(guild, role_data):
@@ -52,7 +49,6 @@ async def create_channel(guild, channel_data, category_map):
                 position=channel_data.get('position', 0)
             )
             print(f"Voice channel {channel_data['name']} created")
-        # Adicione outros tipos (forum, stage, etc.) se necessário
     except Exception as e:
         print(f"Error creating channel {channel_data['name']}: {e}")
 
